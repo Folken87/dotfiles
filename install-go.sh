@@ -84,6 +84,17 @@ else
   log "PATH already configured in $PROFILE_FILE"
 fi
 
+# zsh does not source /etc/profile.d/ — add separately
+ZSH_ENV="/etc/zsh/zshenv"
+if [ -d /etc/zsh ]; then
+  if ! grep -q '/usr/local/go/bin' "$ZSH_ENV" 2>/dev/null; then
+    echo 'export PATH=$PATH:/usr/local/go/bin' >> "$ZSH_ENV"
+    log "Added /usr/local/go/bin to PATH via $ZSH_ENV"
+  else
+    log "PATH already configured in $ZSH_ENV"
+  fi
+fi
+
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo -e "\n${GREEN}═══════════════════════════════════════${NC}"
 echo -e "${GREEN}           Setup complete! 🎉            ${NC}"
