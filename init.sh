@@ -17,6 +17,24 @@ echo -e "\n${BLUE}════════════════════�
 echo -e "${BLUE}        VPS Initial Setup Script        ${NC}"
 echo -e "${BLUE}═══════════════════════════════════════${NC}\n"
 
+# ── 0. Root check ─────────────────────────────────────────────────────────────
+[[ $EUID -ne 0 ]] && err "This script must be run as root"
+
+# ── 0b. OS detection ──────────────────────────────────────────────────────────
+[ -f /etc/os-release ] || err "Cannot detect OS: /etc/os-release not found"
+. /etc/os-release
+
+case "$ID" in
+  ubuntu|debian) ;;
+  *) err "Unsupported OS: $ID. Only Ubuntu and Debian are supported." ;;
+esac
+
+DISTRO="$ID"
+CODENAME="${VERSION_CODENAME}"
+[ -z "$CODENAME" ] && err "Could not determine OS codename from /etc/os-release"
+
+info "Detected OS: $DISTRO $CODENAME"
+
 # ── 1. System update ──────────────────────────────────────────────────────────
 info "Updating system packages..."
 apt update -q && apt upgrade -y -q
@@ -32,14 +50,14 @@ apt remove -y -q docker docker-engine docker.io containerd runc 2>/dev/null || t
 # Add Docker's official GPG key and repo
 apt install -y -q ca-certificates gnupg lsb-release
 install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+curl -fsSL "https://download.docker.com/linux/${DISTRO}/gpg" \
   | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 chmod a+r /etc/apt/keyrings/docker.gpg
 
 echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
-  https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" \
+  https://download.docker.com/linux/${DISTRO} \
+  ${CODENAME} stable" \
   > /etc/apt/sources.list.d/docker.list
 
 apt update -q
@@ -91,6 +109,7 @@ echo -e "\n${GREEN}════════════════════�
 echo -e "${GREEN}           Setup complete! 🎉            ${NC}"
 echo -e "${GREEN}═══════════════════════════════════════${NC}"
 echo -e ""
+echo -e "  OS:            $DISTRO $CODENAME"
 echo -e "  Docker:        $(docker --version | awk '{print $3}' | tr -d ',')"
 echo -e "  Docker Compose: $(docker compose version | awk '{print $4}')"
 echo -e "  Shell:         zsh + Oh My Zsh"
