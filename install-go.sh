@@ -41,11 +41,11 @@ GO_JSON=$(curl -fsSL "https://go.dev/dl/?mode=json") \
   || err "Failed to connect to go.dev (check network/DNS)"
 
 GO_VERSION=$(echo "$GO_JSON" \
-  | grep -o '"version":"go[^"]*"' \
+  | grep -o '"version": *"go[^"]*"' \
   | head -1 \
   | grep -o 'go[0-9.]*' || true)
 
-[ -z "$GO_VERSION" ] && err "Failed to parse Go version from go.dev response"
+[ -z "$GO_VERSION" ] && err "Failed to parse Go version. Response preview: $(echo "$GO_JSON" | head -c 300)"
 
 log "Latest Go version: $GO_VERSION"
 
