@@ -37,12 +37,15 @@ info "Fetching latest Go version..."
 
 command -v curl >/dev/null 2>&1 || err "curl is required but not installed"
 
-GO_VERSION=$(curl -fsSL "https://go.dev/dl/?mode=json" \
+GO_JSON=$(curl -fsSL "https://go.dev/dl/?mode=json") \
+  || err "Failed to connect to go.dev (check network/DNS)"
+
+GO_VERSION=$(echo "$GO_JSON" \
   | grep -o '"version":"go[^"]*"' \
   | head -1 \
-  | grep -o 'go[0-9.]*')
+  | grep -o 'go[0-9.]*' || true)
 
-[ -z "$GO_VERSION" ] && err "Failed to fetch latest Go version"
+[ -z "$GO_VERSION" ] && err "Failed to parse Go version from go.dev response"
 
 log "Latest Go version: $GO_VERSION"
 
