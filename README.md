@@ -19,12 +19,19 @@ One-command setup for a fresh **Ubuntu** or **Debian 12** VPS.
 
 ## Usage
 
+**Base VPS setup** (Docker + Zsh + Oh My Zsh):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/folken87/dotfiles/main/init.sh | bash
 ```
 
-> The script detects the OS automatically — the same command works on both Ubuntu and Debian.
+**Install latest Go:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/folken87/dotfiles/main/install-go.sh | bash
+```
+
+> Both scripts detect the OS and architecture automatically.
 
 ## After installation
 
-Reconnect to your SSH session or run `exec zsh` to switch to the new shell.
+- Reconnect to your SSH session or run `exec zsh` to switch to the new shell.
+- After Go install, run `source /etc/profile.d/go.sh` or reconnect to update `PATH`.
